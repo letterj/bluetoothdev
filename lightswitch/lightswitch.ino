@@ -1,16 +1,5 @@
 
 
-// PIN 13  =    SCK
-// PIN 12  =    MISO
-// PIN 11  =    MOSI
-// PIN 10  =    REQ
-// PIN 02  =    RDY
-// --- --  =    ACT
-// PIN 09  =    RST
-// --- --  =    3VO
-// --- --  =    GRN
-// --- --  =    VIN
-
 
 #include <SPI.h>
 #include <BLEPeripheral.h>
@@ -24,8 +13,8 @@
 
 int currentState;
 int debounceState;
-int switchState = 0;
 int ledState = 0;
+int switchState = 0;
 
 BLEPeripheral blePeripheral = BLEPeripheral(BLE_REQ, BLE_RDY, BLE_RST);
 BLEService lightswitch = BLEService("FF10");
@@ -33,10 +22,11 @@ BLEService lightswitch = BLEService("FF10");
 BLECharCharacteristic switchCharacteristic = BLECharCharacteristic("FF11", BLERead | BLEWrite);
 BLEDescriptor switchDescriptor = BLEDescriptor("2901", "Switch");
 
-BLECharCharacteristic stateCharacteristic = BLECharCharacteristic("FF12", BLENotify);
+BLECharCharacteristic stateCharacteristic = BLECharCharacteristic("FF12", BLERead | BLENotify);
 BLEDescriptor stateDescriptor = BLEDescriptor("2901", "State");
 
 void setup() {
+  
   Serial.begin(9600);
   
   pinMode(LED_PIN, OUTPUT);
@@ -51,8 +41,12 @@ void setup() {
   blePeripheral.addAttribute(switchDescriptor);
   blePeripheral.addAttribute(stateCharacteristic);
   blePeripheral.addAttribute(stateDescriptor);
+
+  Serial.println(F("Smart Light Switch"));
   
-  blePeripheral.begin();
+  // blePeripheral.begin();
+
+  Serial.println(F("Starting ..."));
 }
 
 void loop() {
@@ -64,13 +58,13 @@ void loop() {
   debounceState = digitalRead(BUTTON_PIN);
   
   if ( currentState == debounceState ) {
+
+    if ( currentState != switchState ) {
       
       if ( currentState == LOW ) {
         // BUTTON JUST PRESSED
-        Serial.println(4);
         
       } else {
-        Serial.println("Button event ....");
         if ( ledState == 0) {
           stateCharacteristic.setValue(1);
           switchCharacteristic.setValue(1);
@@ -86,5 +80,7 @@ void loop() {
           Serial.println(0);
         }
       }
+      switchState = currentState;
+    }
   }
 }

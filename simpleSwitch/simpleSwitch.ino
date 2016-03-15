@@ -4,10 +4,13 @@
 
 int currentState;
 int debounceState;
+int ledState = 0;
 int switchState = 0;
-int ledState = 0;;
 
 void setup() {
+
+  Serial.begin(9600);
+  
   pinMode(LED_PIN, OUTPUT);
   pinMode(BUTTON_PIN, INPUT);
 }
@@ -18,7 +21,8 @@ void loop() {
   debounceState = digitalRead(BUTTON_PIN);
   
   if ( currentState == debounceState) {
-    if (currentState != switchState) {
+
+    if ( currentState != switchState ) {
       
       if (currentState == LOW) {
         // Button just released
@@ -26,9 +30,11 @@ void loop() {
         if (ledState == 0) {
           digitalWrite(LED_PIN, HIGH);
           ledState = 1;
+          Serial.println(1);
         } else {
           digitalWrite(LED_PIN, LOW);
           ledState = 0;
+          Serial.println(0);
         }
       }
       switchState = currentState;
