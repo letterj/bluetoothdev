@@ -44,7 +44,9 @@ void setup() {
 
   Serial.println(F("Smart Light Switch"));
   
-  // blePeripheral.begin();
+  switchCharacteristic.setEventHandler(BLEWritten, switchCharacteristicWritten); 
+  
+  blePeripheral.begin();
 
   Serial.println(F("Starting ..."));
 }
@@ -82,5 +84,22 @@ void loop() {
       }
       switchState = currentState;
     }
+  }
+}
+
+void switchCharacteristicWritten(BLECentral& central, BLECharacteristic& characteristic)
+{
+  Serial.print(F("Characteristic event: "));
+  if (switchCharacteristic.value()) {
+    Serial.println(F("light on"));
+    digitalWrite(LED_PIN, HIGH);
+    ledState = 1;
+    stateCharacteristic.setValue(1);
+    
+  } else {
+    Serial.println(F("light off"));
+    digitalWrite(LED_PIN, LOW);
+    ledState = 0;
+    stateCharacteristic.setValue(0);
   }
 }
